@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from hyperquant.api import Platform
+from hyperquant.clients.okex import OkexRESTClient, OkexWSClient
 from hyperquant.clients.binance import BinanceRESTClient, BinanceWSClient
 from hyperquant.clients.bitfinex import BitfinexRESTClient, BitfinexWSClient
 from hyperquant.clients.bitmex import BitMEXRESTClient, BitMEXWSClient
@@ -15,12 +16,14 @@ _rest_client_class_by_platform_id = {
     Platform.BINANCE: BinanceRESTClient,
     Platform.BITFINEX: BitfinexRESTClient,
     Platform.BITMEX: BitMEXRESTClient,
+    Platform.OKEX: OkexRESTClient,
 }
 
 _ws_client_class_by_platform_id = {
     Platform.BINANCE: BinanceWSClient,
     Platform.BITFINEX: BitfinexWSClient,
     Platform.BITMEX: BitMEXWSClient,
+    Platform.OKEX: OkexWSClient,
 }
 
 _rest_client_by_platform_id = {}
