@@ -34,8 +34,9 @@ print('\n\n---------------------')
 client = utils.create_ws_client(platform_id=TEST_PLATFORM)
 client.on_data_item = lambda item: print(item)  # print received parsed objects
 client.subscribe(endpoints=[Endpoint.TRADE, Endpoint.CANDLE], symbols=TEST_SYMBOLS[TEST_PLATFORM],
+#~ client.subscribe(endpoints=[Endpoint.CANDLE], symbols=TEST_SYMBOLS[TEST_PLATFORM],
                  interval=Interval.MIN_1)
 
 print('\n\nWebsocket data\n\n')
 # Sleep to display incoming websocket items from separate thread
-time.sleep(5)
+time.sleep(500)
