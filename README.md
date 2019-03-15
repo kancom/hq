@@ -3,120 +3,74 @@
 ################################################################################
 ﻿Market Clients
 
+    Terminology 1 Common 1 Development 1
 
+    Recommendations for writing clients 3
 
+    Code 5
 
-1. Терминология        1
-Common        1
-Development        1
-2. Рекомендации к написанию клиентов        3
-3. Код        5
-4. Тестовое задание        6
+    Test task 6
 
+    Common terminology 
 
+Currency (Currency) - currency, type of money. For example, the US dollar or Bitcoin.
 
+Currency pair - a pair of currencies, which means the ratio of one currency to another. As with simple math, order matters. For example, the US dollar to bitcoin.
 
+Symbol (Symbol) - a symbol of a currency or currency pair. For example, USD or USDBTC.
 
+Platform (Platform) - system (which is the basis for different activities). A software platform is a software system, usually with its own API.
 
-1. Терминология
-Common
+Exchange (Exchange) - the institution for the conclusion of financial and commercial transactions. Often the exchange is implemented as a software platform accessible via the Internet anywhere in the world. Development
 
+Connector (Connector) - in a broad sense, it is a class or group of classes through which we connect to the API of individual platforms in order to perform an action. In our case, such connectors are broken down into clients that lead the REST and WS interfaces of individual platforms to a single interface at the code level, that is, implemented in a class, as well as connectors in a narrow sense that clients use and implement more complex logic of using API platforms which includes reconnects, error handling, fixing downloaded and missing data that needs to be downloaded later and so on.
 
-Currency (Валюта) — валюта, тип денег. Например, доллар США или биткоин.
+Client (Client) - a class through which we in the program refer to other external API: REST and WS API exchanges, for example. In other words, it converts an external general API into an API at the class level of a specific programming language. Usually, through the same software interface, you can access different platforms, whose own APIs differ.
 
+    Recommendations for writing clients 
 
-Currency pair (Валютная пара) — пара валют, которая означает отношение одной валюты к другой. Как и в простом математическом отношении порядок имеет значение. Например, доллар США к биткоину.
+Now only trades are made and only for three platforms: Binance, Bitfinex and BitMEX (basic source code), so it is obvious that the code will change and should not be taken as something complete or, moreover, dogma. The remaining methods and clients for other platforms can and should be done on the model. To quickly deal with the code, below are some of the principles and the general scheme by which it was written.
 
+To understand the code, it is recommended to go from files binance.py, bitfinex.py, bitmex.py, that is, from examples of specific implementations to the base, to base classes. After that, you can go back: from base classes to specific implementations. The result of the work on adding new clients and implementing new functions will be similar to the code from these three files: binance.py, bitfinex.py, bitmex.py.
 
-Symbol (Символ) — символьное обозначение валюты или валютной пары. Например, USD или USDBTC.
+The client library for different platforms of exchanges is based on the position that all exchanges mostly implement the same functionality: they all give a list of orders, trades and so on. But they do it in different ways. The main difference is in the data format. Therefore, in the code, the converter was taken as the basis, which converts the format of each platform into our common format.
 
+This leads to the main goal of the library: to bring all (ideally all) stock exchanges to a single format, or to provide access to all exchanges through a single interface. Our library should be considered as a single point of access to all exchanges in general.
 
-Platform (Платформа) — система(, которая является основой для разной деятельности). Программная платформа — это программная система, обычно со своим API.
+The format is based on terms and what they mean. Each stock exchange has differences in terminology. Our goal is to eliminate these differences by developing a single, most accurate system of terms. This is the most important, and therefore in the document it is at the very beginning.
 
+The minimum that the library provides is an interface, an empty base class with given function signatures: their names and parameters.
 
-Exchange (Биржа) — учреждение для заключения финансовых и коммерческих сделок. Часто биржа реализуется как программная платформа, доступная через интернет в любой точке мира.
-Development
+Second: this is the converter of our names into the names of a specific platform. For many exchanges, it will be enough to configure the matching dictionaries of these names to make it work.
 
+For the rest, you will have to make certain adjustments to the converter to convert certain values ​​and other things. This is provided by splitting the process of parsing and transformation into separate methods-steps, each of which can be easily redefined in a subclass. Thus, in the client itself, changes are made only in exceptional cases. Probably, platform APIs will come across that will require significant rework in the base classes of the library.
 
-Connector (Коннектор) — в широком смысле это класс или группа классов, через которые мы подключаемся к API отдельных платформ, чтобы выполнить какое-либо действие. В нашем случае такие коннекторы разбиваются на клиенты, которые приводят REST и WS-интерфейсы отдельных платформ к единому интерфейсу на уровне кода, то есть реализованному в классе, а также на коннекторы в узком смысле, которые используют клиенты и реализуют более сложную логику использования API платформ, которая включает реконнекты, обработку ошибок, фиксирование скачанных и пропущенных данных, которые нужно скачать позже и так далее.
+Note.
 
+The library code is not perfect and is in the process of development. The drawbacks of the main library are drawbacks, that is, they need to be fixed, and not repeated or taken as a model for their code.
 
-Client (Клиент) — класс, через который мы в программе обращаемся к другим внешним API: REST и WS API бирж, например. Другими словами, он преобразует внешний общий API в API на уровне классов конкретного языка программирования. Обычно, через одинаковый такой программный интерфейс можно обращаться к разным платформам, собственные API которых отличаются.
-________________
+    Code 
 
+To be able to easily navigate the code, we must always be sure that the same words and the names of variables, classes and methods mean the same concepts. In other words, the name must exactly match its value, the form - the content and vice versa.
 
-2. Рекомендации к написанию клиентов
+For example, if we convert request parameters (params) into platform parameters, then we can no longer use the former name params, but should name the new variable platform_params. This not only makes the code understandable, but also allows you to avoid many errors due to a misunderstanding, and also speeds up development, since you no longer need to keep track of the origin of the value of a variable if we need to make changes in the little known or forgotten old code.
 
+    Test 
 
-Сейчас сделаны только трейды и только для трех платформ: Binance, Bitfinex и BitMEX (базовый исходный код), поэтому очевидно, что код будет меняться, и его не стоит воспринимать как нечто завершенное или, более того, догму. Остальные методы и клиенты для других платформ можно и нужно делать по образцу. Чтобы быстрее разобраться с кодом, ниже приведены некоторые принципы и общая схема по которым он был написан.
+It is necessary to understand the original base classes and, using them, do the following:
 
+    Write a client class (along with a converter) for the OSTAx REST API v1, which implements 2 functions:
+        Getting trades (fetch_trades_history method)
+        Getting candles (kline / candlestick) (fetch_candles method) 
+    Write a client class (along with a converter) for Websocket API v1 of the Okex Exchange, which implements 2 functions:
+        Receiving trades
+        Getting candles (kline / candlestick) 
 
-Чтобы разобраться в коде быстрее всего рекомендуется идти от файлов binance.py, bitfinex.py, bitmex.py, то есть от примеров конкретных реализаций к основанию, к базовым классам. После этого можно пойти обратно: от базовых классов к конкретным реализациям. Результат работы по добавлению новых клиентов и реализации новых функций будет похож на код из этих трех файлов: binance.py, bitfinex.py, bitmex.py.
+Base class source code is https://drive.google.com/file/d/1LGvnjVycOB8Mu2Wxc9ov5fEtFpe2eleS/view
 
+Okex Exchange API Documentation - https://github.com/okcoin-okex/API-docs-OKEx.com/tree/master/API-For-Spot-EN
 
-Библиотека клиентов для разных платформ бирж основана на том положении, что все биржи реализуют в большинстве одну и ту же функциональность: все дают список ордеров, трейдов и прочего. Но они делают это по-разному. Основное различие заключается в формате данных. Поэтому и в коде за основу был взят конвертер, которые преобразует формат каждой платформы в наш общий для всех формат. 
-
-
-Отсюда вытекает основная цель библиотеки: приведение всех (в идеале всех) бирж к единому формату, или предоставление доступа ко всем биржам через единый интерфейс. Наша библиотека должна рассматриваться как единая точка доступа к вообще всем биржам.
-
-
-В основе формата лежат термины и то, что они означают. У каждой биржи есть различия в терминологии. Наша цель устранить эти различия, выработав единую наиболее точную систему терминов. Это самое важное, поэтому и в документе это находится в самом начале.
-
-
-Минимум, что предоставляет библиотека — это интерфейс, пустой базовый класс с заданными сигнатурами функций: их названиями и параметрами. 
-
-
-Второе: это конвертер наших имен в имена конкретной платформы. Для многих бирж будет достаточно настроить словари соответствия этих имен, чтобы все заработало.
-
-
-Для остальных же придется вносить определенные корректировки в конвертер для преобразования тех или иных значений и прочего. Это предусмотрено разбиением процесса парсинга и преобразования на отдельные методы-шаги, каждый из которых можно будет без труда переопределить в подклассе. Таким образом, в самом клиенте изменения вносятся только в исключительных случаях. Вероятно, будут попадаться такие API платформ, которые будут требовать значительных переделок и в базовых классах библиотеки.
-
-
-Примечание.
-
-
-Код библиотеки не идеален и находится в процессе развития. Недостатки основной библиотеки являются недостатками, то есть их нужно исправлять, а не повторять или брать за образец для своего кода.
-
-
-
-
-________________
-
-
-3. Код
-
-
-Чтобы можно было легко ориентироваться в коде, мы должны быть всегда уверены, что одни и те же слова и имена переменных, классов и методов означают одни те же понятия. Другими словами, имя должно точно соответствовать своему значению, форма — содержанию и наоборот.
-
-
-Например, если мы параметры запроса (params) преобразуем в параметры платформы, то мы уже не можем использовать прежнее название params, а должны назвать новую переменную platform_params. Это не только делает код понятным, но и позволяет избежать многих ошибок по недоразумению, а также ускоряет разработку, так как больше не нужно отслеживать происхождение значения той или иной переменной, если нам нужно сделать изменения в малознакомом или подзабытом старом коде.
-
-
-________________
-
-
-4. Тестовое задание
-
-
-Необходимо разобраться в исходных базовых классах и, используя их, сделать следующее:
-
-
-1. Написать класс клиента (вместе с конвертером) для REST API v1 биржи Okex, который реализует 2 функции:
-   * Получение трейдов (trades) (метод fetch_trades_history)
-   * Получение свечей (kline/candlestick) (метод fetch_candles)
-1. Написать класс клиента (вместе с конвертером) для Websocket API v1 биржи Okex, который реализует 2 функции:
-   * Получение трейдов (trades)
-   * Получение свечей (kline/candlestick)
-
-
-Исходный код базовых классов - https://drive.google.com/file/d/1LGvnjVycOB8Mu2Wxc9ov5fEtFpe2eleS/view 
-
-
-Документация API биржи Okex - https://github.com/okcoin-okex/API-docs-OKEx.com/tree/master/API-For-Spot-EN
-
-
-Для проверки работоспособности написанного кода можно использовать файл “run_demo.py” в корне проекта.
-################################################################################
+To check the efficiency of the written code, you can use the “run_demo.py” file in the project root.################################################################################
 
 # hqlib
 Common library for HyperQuant projects on Python
